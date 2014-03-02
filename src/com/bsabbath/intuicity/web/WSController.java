@@ -3,7 +3,6 @@ package com.bsabbath.intuicity.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,28 +29,22 @@ public class WSController {
 
 	@RequestMapping(value = "/v1/metrics/{city}", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<Metrics> getMetrics(@PathVariable String city,@RequestBody LifeQualityCriterias criterias)	
+	public Metrics getMetrics(@PathVariable String city,@RequestBody LifeQualityCriterias criterias)	
 	{
 		LOGGER.info("Metrics Asked for  ["+city+"]");
 		
 		LOGGER.info("NB LifeQualityCriterias  ["+((null != criterias) ? criterias.getCriterias().size():0)+"]");
 
-		ResponseEntity<Metrics> response;
-		HttpStatus responseStatus = HttpStatus.OK;
 		Metrics metrics = null;
 		
 		try {
 			
 			metrics = getMockedMetrics(criterias);
 			
-			if (metrics.hasErrors()){
-				responseStatus = getHttpStatusFromErrorCode(metrics.getErrorMessage().getCode());
-			}
-			
 		}catch(NullPointerException e){ 
 			metrics = new Metrics();
 			metrics.setErrorMessage(new ErrorMessage("ERROR_CODE_BAD_ARGUMENTS", e.getMessage()));
-			responseStatus = HttpStatus.BAD_REQUEST;
+
 			LOGGER.error(metrics.getErrorMessage().toString());
 			
 			
@@ -59,13 +52,10 @@ public class WSController {
 		catch (Exception e){
 			metrics = new Metrics();
 			metrics.setErrorMessage(new ErrorMessage("ERROR_CODE_UNDEFINED", e.getMessage()));
-			responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 			LOGGER.error(metrics.getErrorMessage().toString());
 		}
 		
-		response = new ResponseEntity<Metrics>(metrics,responseStatus);
-		
-		return response;
+		return metrics;
 	}
 	
 	private Metrics getMockedMetrics(LifeQualityCriterias criterias)

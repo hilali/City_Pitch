@@ -15,10 +15,10 @@ import com.bsabbath.intuicity.model.ErrorMessage;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Metrics {
 	
-	public Metrics() {}
-    public Metrics(List<Metric> metrics) {
-        this.metrics = metrics;
-    }
+//	public Metrics() {}
+//    public Metrics(List<Metric> metrics) {
+//        this.metrics = metrics;
+//    }
 
     public void addMetric(Metric pMetric)
     {
