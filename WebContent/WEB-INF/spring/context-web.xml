@@ -17,7 +17,7 @@
     
     <!-- Configures the annotation-driven Spring MVC Controller programming model -->
     <mvc:annotation-driven/>    
-    <mvc:default-servlet-handler/>
+<!--     <mvc:default-servlet-handler/> -->
 <!-- 	<mvc:resources location="/design/**" mapping="/design/" cache-period="31556926"/> -->
 <!-- 	<mvc:resources location="/decorators/**" mapping="/decorators/" cache-period="31556926"/>	 -->
 	<mvc:interceptors>
