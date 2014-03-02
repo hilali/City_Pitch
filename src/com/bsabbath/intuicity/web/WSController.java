@@ -6,11 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.bsabbath.intuicity.model.ErrorMessage;
+import com.bsabbath.intuicity.web.dto.LifeQualityCriteria;
+import com.bsabbath.intuicity.web.dto.LifeQualityCriterias;
 import com.bsabbath.intuicity.web.dto.Metric;
 import com.bsabbath.intuicity.web.dto.Metrics;
 
@@ -25,44 +28,21 @@ public class WSController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WSController.class);
 
 
-	@RequestMapping(value = "/v1/metrics/{city}", method = RequestMethod.GET)
+	@RequestMapping(value = "/v1/metrics/{city}", method = RequestMethod.POST)
 	@ResponseBody
-	//public ResponseEntity<Metrics> getMetrics(@PathVariable String city,@RequestBody LifeQualityCriterias criterias)
-	public ResponseEntity<Metrics> getMetrics(@PathVariable String city)
+	public ResponseEntity<Metrics> getMetrics(@PathVariable String city,@RequestBody LifeQualityCriterias criterias)	
 	{
 		LOGGER.info("Metrics Asked for  ["+city+"]");
+		
+		LOGGER.info("NB LifeQualityCriterias  ["+((null != criterias) ? criterias.getCriterias().size():0)+"]");
 
 		ResponseEntity<Metrics> response;
 		HttpStatus responseStatus = HttpStatus.OK;
-		Metrics metrics = new Metrics();
+		Metrics metrics = null;
 		
 		try {
 			
-			metrics = new Metrics();
-			
-			Metric metric = new Metric();
-			metric.setValue("Good");
-			metrics.addMetric(metric);
-			
-			metric = new Metric();
-			metric.setValue("Very Good");
-			metrics.addMetric(metric);
-			
-			metric = new Metric();
-			metric.setValue("Excellent");
-			metrics.addMetric(metric);
-			
-			metric = new Metric();
-			metric.setValue("Not Bad");
-			metrics.addMetric(metric);
-			
-			metric = new Metric();
-			metric.setValue("Bad");
-			metrics.addMetric(metric);
-			
-			metric = new Metric();
-			metric.setValue("Very Bad");
-			metrics.addMetric(metric);
+			metrics = getMockedMetrics(criterias);
 			
 			if (metrics.hasErrors()){
 				responseStatus = getHttpStatusFromErrorCode(metrics.getErrorMessage().getCode());
@@ -86,6 +66,26 @@ public class WSController {
 		response = new ResponseEntity<Metrics>(metrics,responseStatus);
 		
 		return response;
+	}
+	
+	private Metrics getMockedMetrics(LifeQualityCriterias criterias)
+	{
+		final String[] M_VALUES = {"Good","Very Good","Excellent","Not Bad","Bad","Very Bad"};
+		Metrics metrics = new Metrics();
+		Metric metric = null;
+		
+		if (null != criterias)
+		{
+			int index = 0;
+			for(LifeQualityCriteria criteria:criterias.getCriterias())
+			{
+				metric = new Metric(criteria.getName(),M_VALUES[index++]);
+				
+				metrics.addMetric(metric);				
+			}
+		}
+		
+		return metrics;
 	}
 
 

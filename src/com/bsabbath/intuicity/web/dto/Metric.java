@@ -1,10 +1,27 @@
 package com.bsabbath.intuicity.web.dto;
 
-
-
 public class Metric {
 	
+	private String name;
 	private String value;	
+	
+	public Metric() {
+		super();
+	}	
+	
+	public Metric(String name, String value) {
+		super();
+		this.name = name;
+		this.value = value;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getValue() {
 		return value;
