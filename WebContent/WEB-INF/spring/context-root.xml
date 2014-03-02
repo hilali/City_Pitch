@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-3.1.xsd
+			http://www.springframework.org/schema/task
+			http://www.springframework.org/schema/task/spring-task-3.1.xsd
+			http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+
+	<bean id="propertiesConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:config.properties" />
+		<property name="ignoreResourceNotFound" value="true" />
+	</bean>	
+	
+	<bean id="resourceProperties" class="org.springframework.core.io.ClassPathResource">
+		<constructor-arg value="/config.properties"/>
+	</bean>
+
+	<!-- run the method onStartup on application startup -->
+<!-- 	<bean class="com.cogeco.pts.task.ApplicationTask" init-method="onStartup" /> -->
+
+	<!-- Activates various annotations to be detected in bean classes -->
+	<context:annotation-config />
+	<context:component-scan base-package="com.bsabbath.intuicity" />
+
+	<task:annotation-driven />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
+	<!-- Contains Spring JPA related configurations -->
+<!-- 	<import resource="context-dao.xml" /> -->
+
+	<!-- Contains Spring Security related configurations -->
+	<import resource="context-security.xml" />
+
+	<!-- Contains Spring Soap Web Service related configurations -->
+	<import resource="context-ws.xml" />
+
+</beans>

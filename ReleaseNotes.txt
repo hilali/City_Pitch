@@ -1,0 +1,32 @@
+----------------------------------------------------------
+This comment section must stay on top of the file.
+
+Add after this comment section your release description comments
+Each new release must have a comment.. 
+The latest release comment should follow
+the comment line --Beginning of Release Notes--
+
+Add a short description of the change done in the release
+
+Release Notes Template. Each fields are Mandatory:
+..........................................................
+TAG :
+Desc:
+..........................................................
+Field description:
+TAG :  The SVN TAG. Look at Hudson you can find the next TAG 
+       value. The minutes and sec may differe so just put xx-xx
+       EX: release: 22_2012-03-07_15-45-47-R-LocalizationRestService
+       Release note TAG value would be 
+       22_2012-03-07_15-xx-xx-R-LocalizationRestService
+Desc:  A short description of the modification done in this 
+       Focus on the difference between previous version and this one.
+       This comment can be as simple as:
+       Added Functionality XYX for IPTV projects.
+
+----------------------------------------------------------
+----------------------------------------------------------
+---------------Beginning of Release Notes-----------------
+..........................................................
+TAG : 01_2012_06_26_18-21-00-R-PlannigToSellingR1
+Desc: Release for Prod

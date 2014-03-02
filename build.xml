@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Build WAR application -->
+<!--
+USAGE: This ant Script will build a standard WAR application
+       The WAR file is generated under dist/...war
+       ${distribution.dir}/${package.name}.war
+       
+- 1- Change the project name 
+- 2- Change the artifact name
+- 3- Put all your dependencies JAR under ${webroot.dir}/WEB-INF/lib WebRoot/WEB-INF/lib
+- 4- Put your Java code under src/
+- 5- Put you resources under resources/ The will be copied in the WAR classes directory 
+     (They will be Accessible in your class path.)
+- 6- Edit the WEB.xml 
+- 7- The war is generated ${distribution.dir}/${package.name}.war 
+- 8- Change the package for the javadoc generation
+- 9- Change the JUnit test files
+
+WARNING WARNING Integration issue with ECLIPSE
+To deploy a Project in the Tomcat running in Eclipse you must first make sure to run the ANT task Clean 
+and do a Eclipse-Project-Clean  If you do not Eclipse is confuse since the Classes are under build/classes
+
+
+-->
+<!--- 1- Change the project name -->
+
+<project name="CityPitch" default="package">
+
+    <!-- import the properties. -->
+	<property file="build.properties"/>
+	
+	<!-- Classpaths. -->
+	<!-- lib class path -->
+    <path id="compile.classpath">
+        <fileset dir="./">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+    
+    <!-- lib class path -->
+    <path id="test.compile.classpath">
+        <pathelement location="${classes.dir}"/>
+        <fileset dir="./">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+    
+    <path id="test.classpath">
+        <pathelement location="${classes.dir}" />
+        <pathelement location="${test.classes.dir}" />
+        <fileset dir="./">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+    
+    
+	<path id="emma.lib">
+		<pathelement location="${emma.dir}/emma.jar" />
+		<pathelement location="${emma.dir}/emma_ant.jar" />
+		<pathelement location="${emma.dir}/junit-4.10.jar" />
+	</path>
+	
+	
+	<path id="emma.libs.classpath">
+        <pathelement location="${instr.dir}" />
+        <pathelement location="${classes.dir}" />  
+		<pathelement location="${test.classes.dir}" />
+        <fileset dir="./">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+    
+    
+        <!-- Custom task definition. -->
+    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+    
+	
+	
+	<!-- create distribution, compilation folder. Copy lib jar and 
+	properties files -->
+	<target name="-init">
+	   <echo>----------------------------------------------------------------------------</echo>
+	   <echo>Script configuration</echo>
+	   <echo>----------------------------------------------------------------------------</echo>
+	   <echo>artifact.name = ${artifact.name}</echo>
+	   <echo>package.name = ${package.name}</echo>
+	   <echo>webroot=${webroot}</echo>
+	   <echo>src.dir=${src.dir}</echo>
+	   <echo>test.dir=${test.dir}</echo>
+	   <echo>resources.dir=${resources.dir}</echo>
+	   <echo>build.dir=${build.dir}</echo>
+	   <echo>classes.dir=${classes.dir}</echo>
+	   <echo>test.classes.dir=${test.classes.dir}</echo>
+	   <echo>jar.dir=${jar.dir}</echo>
+	   <echo>distribution.dir=${distribution.dir}</echo>
+	   <echo>webroot.dir=${webroot.dir}</echo>
+	   <echo>distribution.webroot.dir=${distribution.webroot.dir}</echo>
+	   <echo>webroot.lib.dir=${webroot.lib.dir}</echo>
+	   <echo>web.xml.file=${web.xml.file}</echo>
+	   <echo>junit.report.dir=${junit.report.dir}</echo>
+	   <echo>emma.out.dir=${emma.out.dir}</echo>
+	   <echo>instr.dir=${instr.dir}</echo>
+	   <echo>coverage.dir=${coverage.dir}</echo>
+	   <echo>reports.dir=${reports.dir}</echo>
+	   <echo>emma.dir=${emma.dir}</echo>
+	   <echo>environment=${environment}</echo>
+	   <echo>----------------------------------------------------------------------------</echo>
+	
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${test.classes.dir}" />
+		<mkdir dir="${distribution.dir}" />
+		<mkdir dir="${distribution.webroot.dir}" />
+		<copy todir="${classes.dir}">
+			<fileset dir="${src.dir}" excludes="**/*.java" />
+			<fileset dir="${resources.dir}" excludes="**/*.properties"/>
+		</copy>
+		<copy file="${resources.dir}/config_${environment}.properties" tofile="${classes.dir}/config.properties"/>
+		<copy file="${resources.dir}/log4j_${environment}.properties" tofile="${classes.dir}/log4j.properties"/>
+		<copy todir="${test.classes.dir}">
+            <fileset dir="${test.dir}" excludes="**/*.java" />
+        </copy>
+	</target>
+	
+	
+	<!-- delete compilation and last build -->
+    <target name="clean" description="Clean up the workspace">
+        <delete dir="dist" />
+        <delete dir="build" />
+    </target>
+	
+	<!-- Delete the ${build} directory -->
+    <target name="clean-emma" depends="-clean-emma-tmp-dir">
+        <delete dir="${coverage.dir}" />
+        <delete dir="${emma.out.dir}" />
+    </target>
+    
+    
+    <target name="-clean-emma-tmp-dir">
+
+        <delete dir="${instr.dir}" />
+        <delete dir="${reports.dir}" />
+    </target>       
+    
+	
+	
+	<!-- compile the applicaton -->
+	<target name="compile" depends="-init" description="Compile the application sources">
+		<javac destdir="${classes.dir}" debug="true" srcdir="${src.dir}" encoding="iso-8859-1">
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+	
+	<target name="compileTest" depends="-init,compile" description="Compile the JUNIT tests">
+	   <copy todir="${test.classes.dir}">
+	       <fileset dir="${test.dir}" excludes="**/*.java" />
+	   </copy>
+		<javac destdir="${test.classes.dir}" srcdir="${test.dir}" encoding="iso-8859-1">
+			<classpath refid="test.compile.classpath" />
+		</javac>
+	</target>	
+	
+	
+	
+	<!-- create the war file -->
+	<target name="package" depends="clean,compile" description="Create the distribution war">
+		<copy todir="${distribution.webroot.dir}">
+			<fileset dir="${webroot.dir}" />
+		</copy>
+		<war destfile="${distribution.dir}/${package.name}.war" webxml="${web.xml.file}" encoding="iso-8859-1">
+			<fileset dir="${distribution.webroot.dir}" />
+			<classes dir="${classes.dir}" />
+			<manifest>
+				<attribute name="Built-By" value="hudson-${user.name}" />
+				<section name="bsabbath-Applications">
+					<attribute name="Specification-Vendor" value="bsabbath" />
+					<attribute name="App-Name" value="${artifact.name}" />
+					<attribute name="App-Title" value="${hudson.app.name}" />
+					<attribute name="App-Build-ID" value="${hudson.build.number}" />
+					<attribute name="App-Build-Date" value="${hudson.build.id}" />
+					<attribute name="App-Build-For" value="${hudson.build.for.project}" />
+					<attribute name="App-ID" value="${hudson.build.number}_${hudson.build.id}" />
+					<attribute name="Tag" value="${hudson.tag.value}" />
+				</section>
+			</manifest>
+		</war>
+	</target>	
+	
+	
+	
+	<!-- create the war file -->
+	<target name="packageMigration" depends="clean,compile,compileTest" description="Create the distribution war">
+		<copy todir="${distribution.webroot.dir}">
+			<fileset dir="${webroot.dir}" />
+		</copy>
+		<war destfile="${distribution.dir}/${package.name}.war" webxml="${web.xml.file}" encoding="iso-8859-1">
+			<fileset dir="${distribution.webroot.dir}" />
+			<classes dir="${classes.dir}" />
+			<classes dir="${test.classes.dir}" />
+			<manifest>
+				<attribute name="Built-By" value="hudson-${user.name}" />
+				<section name="bsabbath-Applications">
+					<attribute name="Specification-Vendor" value="bsabbath" />
+					<attribute name="App-Name" value="${artifact.name}" />
+					<attribute name="App-Title" value="${hudson.app.name}" />
+					<attribute name="App-Build-ID" value="${hudson.build.number}" />
+					<attribute name="App-Build-Date" value="${hudson.build.id}" />
+					<attribute name="App-Build-For" value="${hudson.build.for.project}" />
+					<attribute name="App-ID" value="${hudson.build.number}_${hudson.build.id}" />
+					<attribute name="Tag" value="${hudson.tag.value}" />
+				</section>
+			</manifest>
+		</war>
+	</target>
+
+
+	
+	<target name="gen-javadoc" description="Generate the javadoc.">
+	   <javadoc
+		      destdir="doc/javadoc"
+		      version="true"
+		      windowtitle="${artifact.name}" >
+	      <classpath refid="compile.classpath"/>
+		  <packageset dir="src" defaultexcludes="yes">
+			      <include name="com/bsabbath/cpitch/**"/>
+		    	  <exclude name="**/test/**"/>
+		  </packageset>
+       </javadoc>
+	</target>
+	
+	
+	
+	<target name="runJunit" depends="package,compileTest" description="Run the junit" >
+		<delete dir="${junit.report.dir}" />
+		<mkdir dir="${junit.report.dir}"/>
+		<junit printsummary="yes" fork="yes" haltonfailure="yes">
+			<formatter type="xml" usefile="yes" />
+			<classpath refid="test.classpath" />
+			<batchtest todir="${junit.report.dir}">
+				<fileset dir="${test.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+
+	<!-- Following section includes all the EMMA test coverage items. -->
+	<!-- Dependencies to your ant 
+	      Ant task dependencies:
+	       -package expected to exist in your ant project.
+	       -clean, expected to exist in your ant project.
+	       - -init expected to exist in your ant project start with - to make it 
+	          provate. You can not run it because it start by -.
+	       -compile expected to exist in your ant project.
+	      Property dependencies:
+	       -src.dir Your source code directory
+	       -test.classpath complete class path to run unit test. Ex: 
+	       <path id="test.classpath">
+	       		<pathelement location="${classes.dir}" />
+				<fileset dir="./">
+					<include name="**/*.jar" />
+				</fileset>
+		    </path>
+	
+	
+	      Directory needed: 
+	      -compileOnly-lib directory containing JAR needed to run unit test but not included in the WAR.
+	                       Should contain Junit.jar and EMMA.jars 
+	
+	    To reuse the following you need to modify the following:
+	      -1- Define you Junit class 
+	      -2- Excludes code
+	   
+	    Execute TASK gen-emma-report.html to generate EMMA report 
+	    Report is in ${coverage.dir}coverage.html
+	-->
+	
+	<target name="gen-emma-reports" depends="clean-emma,-runJunitWithEmma" description="Generate the reports.">
+		<taskdef resource="emma_ant.properties" />
+		<emma>
+			<report sourcepath="${src.dir}">
+				<fileset dir="${coverage.dir}">
+					<include name="*.emma" />
+				</fileset>
+				<html outfile="${coverage.dir}/coverage.html" />
+				<xml  outfile="${coverage.dir}/coverage.xml" />
+			</report>
+		</emma>
+		<antcall target="-clean-emma-tmp-dir"/>
+	</target>	
+
+
+	<target name="gen-emma-report.html" depends="clean-emma,-runJunitWithEmma" description="Generate the emma reports in html">
+		<taskdef resource="emma_ant.properties" />
+		<emma>
+			<report sourcepath="${src.dir}">
+				<fileset dir="${coverage.dir}">
+					<include name="*.emma" />
+				</fileset>
+				<html outfile="${coverage.dir}/coverage.html" />
+			</report>
+		</emma>
+		<antcall target="clean-emma-tmp-dir"/>
+	</target>
+
+	
+	<target name="-runJunitWithEmma" depends="-instr,compileTest" description="Run the junit using emma.">
+
+		<mkdir dir="${emma.out.dir}" />
+		<mkdir dir="${instr.dir}" />
+		<mkdir dir="${coverage.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<junit printsummary="yes" fork="yes" haltonfailure="yes" showoutput="true">
+			<classpath>
+				<path refid="emma.libs.classpath" />
+			</classpath>
+			<jvmarg value="-Demma.coverage.out.file=${coverage.dir}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=true" />
+			<formatter type="xml" />
+			<batchtest todir="${reports.dir}">
+				<fileset dir="${test.dir}">
+					<!-- -1- Define you Junit class you can use paterns like *Test*.java -->
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+
+
+	<path id="emma.toInstrument.dir">
+		<pathelement location="${classes.dir}" />
+	</path>
+	<!-- Instrument the code -->
+	<target name="-instr" depends="clean,-init,compile">
+		<emma>
+			<instr instrpathref="emma.toInstrument.dir" destdir="${instr.dir}" metadatafile="${coverage.dir}/metadata.emma" merge="true">
+				<!-- We exclude from code coverage: Junit test code, AXIS2 generated code, and legacy client code since it is stub for testing.
+				  -2- Excludes code which should not be part of the test coverage.
+				-->
+				<filter excludes="*Test*,com.bsabbath.cpitch.tools.sendemail.auto.*" />
+			</instr>
+		</emma>
+	</target>
+
+	
+    <target name="package-gen-javadoc" depends="package,gen-javadoc" description="Create the war and generate the javadoc"/>
+    <target name="package-and-gen-emma-report" depends="package,gen-emma-reports" description="Create the war, execute the junit test and generate the report."/>
+
+</project>
