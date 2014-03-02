@@ -1,0 +1,41 @@
+Example :
+
+
+Request : Metrics for Halifax
+------------------------------
+
+http://intuicity-bsabbath.rhcloud.com/citypitch/ws/v1/metrics/Halifax
+
+Request Body :
+
+{"criterias":[{"name":"Health"},{"name":"Education"},{"name":"Safety"}]}
+
+
+
+Response : Metrics values
+-------------------------
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:metricPerCity xmlns:ns2="http://www.bsabbath.com/intuicity">
+	<metrics>
+		<metric>
+			<name>Education</name>
+			<value>
+				<metricPercentage>0.78</metricPercentage>
+				<nationalPercentageAverage>0.946923</nationalPercentageAverage>
+				<topThree>1) Montreal 2.30%,&lt;br&gt;2) Vancouver
+					2.06%,&lt;br&gt;3) St. John's 1.30%</topThree>
+			</value>
+		</metric>
+		<metric>
+			<name>Safety</name>
+			<value>
+				<metricPercentage>15.773809</metricPercentage>
+				<nationalPercentageAverage>55.8927</nationalPercentageAverage>
+				<topThree>1) Neguac 93.17%,&lt;br&gt;2) North Bay (East Ferris)
+					91.95%,&lt;br&gt;3) Upper Ottawa Valley (Laurentian Hills) 89.17%
+				</topThree>
+			</value>
+		</metric>
+	</metrics>
+</ns2:metricPerCity>
