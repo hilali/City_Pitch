@@ -3,17 +3,8 @@ package com.bsabbath.intuicity.web.dto;
 public class Metric {
 	
 	private String name;
-	private String value;	
 	
-	public Metric() {
-		super();
-	}	
-	
-	public Metric(String name, String value) {
-		super();
-		this.name = name;
-		this.value = value;
-	}
+	private MetricValue value;
 
 	public String getName() {
 		return name;
@@ -21,13 +12,32 @@ public class Metric {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getValue() {
+	}		
+	
+	public MetricValue getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(MetricValue value) {
 		this.value = value;
 	}
+
+	@Override
+	public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("[");        
+        sb.append("\"");
+        sb.append(name);
+        sb.append("\"");
+        sb.append(",");
+        sb.append("\"");
+        sb.append(value);
+        sb.append("\"");        
+        sb.append("]");
+        
+        return sb.toString();	
+        
+	}
+	
 }

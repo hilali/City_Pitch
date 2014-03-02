@@ -28,7 +28,7 @@ public class LifeQualityCriteria {
         sb.append("\"");
         
         sb.append("}");
-        return sb.toString();	}
-	
-	
+        return sb.toString();	
+        
+	}
 }

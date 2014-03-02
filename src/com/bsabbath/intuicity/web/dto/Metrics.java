@@ -9,6 +9,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.bsabbath.intuicity.model.ErrorMessage;
 
 @XmlRootElement (name="metricPerCity", namespace="http://www.bsabbath.com/intuicity")
@@ -58,4 +60,9 @@ public class Metrics {
 	
 	@XmlElement (name="error")
 	private ErrorMessage errorMessage ;
+
+	@Override
+	public String toString() {        
+        return StringUtils.join(metrics, ",");	        
+	}
 }

@@ -2,6 +2,10 @@ package com.bsabbath.intuicity.data;
 
 import java.util.HashMap;
 
+import com.bsabbath.intuicity.web.dto.Metric;
+import com.bsabbath.intuicity.web.dto.MetricValue;
+import com.bsabbath.intuicity.web.dto.Metrics;
+
 public class Safety {
 
 	private static HashMap<String, Float> m = new HashMap<String, Float>(595);
@@ -605,21 +609,40 @@ public class Safety {
 		m.put( "Neguac",0.931749395f);
 	}
 	
-	public static Float getNationalPercentageAverage(){
-		return 0.558927f * 100;
+	public static void addMetric(Metrics pMetrics,String city)
+	{
+		if (null != pMetrics)
+		{
+			Metric metric = getMetric(city);
+			pMetrics.addMetric(metric);
+		}		
 	}
 	
-	public static Float getSafetyPercentage(String city){
-		return m.get(city) * 100;
+	public static Metric getMetric(String city)
+	{
+		Metric metric = new Metric();
+		metric.setName("Safety");
+		
+		MetricValue value = new MetricValue();
+		
+		value.setMetricPercentage(String.valueOf(get(city) * 100));
+		value.setNationalPercentageAverage(String.valueOf(0.558927f * 100));
+		value.setTopThree("1) Neguac 93.17%,<br>2) North Bay (East Ferris) 91.95%,<br>3) Upper Ottawa Valley (Laurentian Hills) 89.17%");
+		
+		metric.setValue(value);
+		
+		return metric;
 	}
 	
-	public static String getTopThree(){
-		return "1) Neguac 93.17%,<br>2) North Bay (East Ferris) 91.95%,<br>3) Upper Ottawa Valley (Laurentian Hills) 89.17%";
+	private static Float get(String city)
+	{
+		Float fResult = m.get(city);
+		
+		if (null == fResult)
+		{
+			fResult = -1F;
+		}
+		
+		return fResult;
 	}
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		System.out.println(Safety.getSafetyPercentage("Montreal"));
-	}
-
 }
